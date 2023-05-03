@@ -17,12 +17,14 @@ def readLogFiles(logfile1, logfile2):
     cmdNum = 0
     line = 0
     decisionsR1 = []
+    decisionsR2 = []
     for rowf1, rowf2 in zip_longest(csv_f1, csv_f2):
         line += 1
         if len(rowf1) <= 1: continue    # Blank line [] or ['OK']
         if rowf1[3] == "hello" or rowf1[3] == "ping": continue
-        # Assume file only has set commands (0-5 fields)
+        # At the moment assume file only has set commands (0-5 fields)
         decisionsR1.append(rowf1[5])
+        decisionsR2.append(rowf2[5])
         if rowf1[5] != rowf2[5]:
             countDiff += 1
             print("Difference at operation #" + str(cmdNum) + ": " + rowf1[5] + " , " + rowf2[5])
@@ -32,39 +34,64 @@ def readLogFiles(logfile1, logfile2):
     f2.close()
     print("Total Commands: " + str(cmdNum))
     print("Total Inconsistencias: " + str(countDiff))
-    return decisionsR1
+    return decisionsR1, decisionsR2
 
 
-def plotData(decisionsR1):
+'''
+def plotDatav1(decisionsR1):
     print("decisionsR1:")
     print(decisionsR1)
     # TODO: compare len of decisions array between each other
     slotDecisionsR1 = list(range(len(decisionsR1)))
-    decisionsR1Fl = [float(i) for i in slotDecisionsR1]
-    
+    decisionsR1Fl = [float(i) for i in decisionsR1]
+
     # Create plot
     plt.plot(slotDecisionsR1, decisionsR1Fl)
-    plt.xlabel('Slot Decision')
+    plt.xlabel('Operation number')
     plt.ylabel('Value USD-PEN')
-    plt.title('Consistency over Time between replicas')
+    plt.title('Consistency between replicas')
 
-    # Plot the data
-    # fig, ax = plt.subplots()
-    # ax.plot(slotDecisionsR1, decisionsR1)
+    # Show plot
+    plt.show()
+'''
 
-    # # Reduce the number of values on the y-axis
-    # yticks = np.linspace(np.floor(np.min(y)), np.ceil(np.max(y)), 5)
-    # ax.set_yticks(yticks)
 
-    # # Show plot
-    # plt.show()
+def plotData(decisionsR1, decisionsR2):
+    print("decisionsR1:")
+    print(decisionsR1)
+    # TODO: compare len of decisions array between each other
+    slotDecisionsR1 = list(range(len(decisionsR1)))
+    decisionsR1Fl = [float(i) for i in decisionsR1]
+    print("decisionsR1 Floats:")
+    print(decisionsR1Fl)
+
+    slotDecisionsR2 = list(range(len(decisionsR2)))
+    decisionsR2Fl = [float(i) for i in decisionsR2]
+
+    if len(slotDecisionsR1) != len(slotDecisionsR2):
+        print("My Panic: len(decisions) are different!")
+
+    # Create plot
+    # x: Unit works ~ slotDecisions (We can think this like 'time')
+    # y: Value of each replica
+    plt.plot(slotDecisionsR1, decisionsR1Fl, label='Replica 1')
+    plt.plot(slotDecisionsR2, decisionsR2Fl, label='Replica 2')
+
+    # Customize Plot
+    plt.xlabel('Operation number')
+    plt.ylabel('Value USD-PEN')
+    plt.title('Consistency between replicas')
+    plt.legend()
+
+    # Show plot
+    plt.show()
 
 
 def main():
     logfile1 = "logs/sinrabia/redis_svr1.txt"
     logfile2 = "logs/sinrabia/redis_svr2.txt"
-    decisionsR1 = readLogFiles(logfile1, logfile2)
-    plotData(decisionsR1)
+    decisionsR1, decisionsR2 = readLogFiles(logfile1, logfile2)
+    plotData(decisionsR1, decisionsR2)
     print("done...bye!")
 
 if __name__ == "__main__":
