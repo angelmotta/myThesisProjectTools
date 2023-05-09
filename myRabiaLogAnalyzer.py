@@ -74,20 +74,25 @@ input: list of log files
 output: list of operations executed by each replica
 '''
 def newreadLogFiles(listLogFiles):
+    # Open files
     listCsvReaders = []
+    filesObjects = []
     for file in listLogFiles:
         f = open(file)
+        filesObjects.append(f)
         csvReader = csv.reader(f, delimiter=" ")
         listCsvReaders.append(csvReader)
 
-    countDiff = 0
-    numLine = 1
-    setCmds = 0
-    getCmds = 0
+    # Start reading files
     filesRead = 0
     decisions = []
+    sumSetsGets = []
     for logfile in listCsvReaders:
         decisionReplica = []
+        prevState = 0
+        numLine = 0
+        setCmds = 0
+        getCmds = 0
         for lineList in logfile:
             # Logic
             # Ignore metadata 
@@ -95,10 +100,42 @@ def newreadLogFiles(listLogFiles):
             if len(lineList) <= 1: continue    # Blank line [] or ['OK']
             if lineList[3] == "hello" or lineList[3] == "ping": continue
             # If operation is GET (set prev state in decision array for this replica)
-            # If operation is SET (set new state in decision array for this replica)
-        # Read done, go for next log file
+            if lineList[3] == "get":
+                decisionReplica.append(prevState)
+                getCmds += 1
+            # elif operation is SET (set new state in decision array for this replica)
+            elif lineList[3] == "set":
+                prevState = lineList[5]     # update previous state with new state
+                decisionReplica.append(prevState)
+                setCmds += 1
+            else:
+                # shoudn't happen: panic and exit
+                print("Error: Operation not recognized: Op# " + str(numLine) + lineList)
+                exit(1)
+        # Read file done
+        decisions.append(decisionReplica)
+        # insert setCmds and getCmds in sumSetsGets as tuplas
+        sumSetsGets.append((setCmds, getCmds))
+        # Close current file and go for next one
+        filesObjects[filesRead].close()
         filesRead += 1
+    # print summary results
     print("Total read files: " + str(filesRead))
+    # return results
+    return decisions, sumSetsGets
+
+'''
+printSummaryResults: print summary results of log analysis
+'''
+def printSummaryResults(decisions, summary):
+    print("-- Summary Results --")
+    for index, replica in enumerate(decisions):
+        # print index of iteration
+        print('Decisions Replica # {}'.format(index))
+        print(replica)
+    print("Sets and Gets Commands:")
+    print(summary)
+    return
 
 
 '''
@@ -121,8 +158,10 @@ def main():
     logfile2 = "logs/rabia/t4/rabiasvr2log.txt"
     logfile3 = "logs/rabia/t4/rabiasvr3log.txt"
     #readLogFiles(logfile1, logfile2, logfile3)
-    listFiles = [logfile1]
-    newreadLogFiles(listFiles)
+    listFiles = [logfile1, logfile2, logfile3]
+    decisions, summary = newreadLogFiles(listFiles)
+    printSummaryResults(decisions, summary)
+    #checkConsistency(decisions)
     #plotData(decisionsR1, decisionsR2)
     print("done...bye!")
 
