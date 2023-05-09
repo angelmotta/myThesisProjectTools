@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 """readLogfiles:
 Input: two path filenames ideally inside a 'logs' directory placed in the current directory
-Output: a 2D array including an array for each replica
+Output: two arrays of decisions 1 per replica
 """
 def readLogFiles(logfile1, logfile2):
     zip_longest = itertools.zip_longest

@@ -3,9 +3,9 @@ import itertools
 
 zip_longest = itertools.zip_longest
 
-f1 = open("./rabia/rabiasvr1log.txt")
-f2 = open("./rabia/rabiasvr2log.txt")
-f3 = open("./rabia/rabiasvr3log.txt")
+f1 = open("./logs/rabia/t4/rabiasvr1log.txt")
+f2 = open("./logs/rabia/t4/rabiasvr2log.txt")
+f3 = open("./logs/rabia/t4/rabiasvr3log.txt")
 
 csv_f1 = csv.reader(f1, delimiter=" ")
 csv_f2 = csv.reader(f2, delimiter=" ")
