@@ -1,5 +1,6 @@
 import csv
 import itertools
+import matplotlib.pyplot as plt
 
 zip_longest = itertools.zip_longest
 
@@ -147,22 +148,84 @@ def checkConsistency():
 
 
 '''
-plotLogsReplica(): plot state value of each replica in one graph
+plotLogsReplica(): plot state of each replica in one graph
 '''
-def plotLogsReplica():
-    return
+def plotStateReplica(decisions):
+    # Generate array of float values for each replica
+    stateReplicas = []
+    operationsReplicas = []
+    for replica in decisions:
+        stateReplica = [float(i) for i in replica]
+        listOperations = list(range(len(replica)))
+        stateReplicas.append(stateReplica)
+        operationsReplicas.append(listOperations)
+
+    # Begin: Generate array of float values for each replica
+    '''
+    slotDecisionsR1 = list(range(len(decisionsR1)))
+    decisionsR1Fl = [float(i) for i in decisionsR1]
+    print("decisionsR1 Floats:")
+    print(decisionsR1Fl)
+
+    slotDecisionsR2 = list(range(len(decisionsR2)))
+    decisionsR2Fl = [float(i) for i in decisionsR2]
+    '''
+    # End: Generate array of float values for each replica
+
+    # Create plot with state of each replica
+    # x: Operation number or Unit work ~ state (We can think this like 'time')
+    # y: Value of each replica
+    #color = 0.0
+    #for index, replica in enumerate(stateReplicas):
+        #plt.plot(operationsReplicas[index], replica, label='Replica ' + str(index))
+        #plt.scatter(operationsReplicas[index], replica, label='Replica ' + str(index))
+
+    stateReplicasOffset = []
+    myoffset = 0
+    for stateReplica in stateReplicas:
+        stateReplicasOffset.append([state + myoffset for state in stateReplica])
+        myoffset += 0.001
+    
+    offset = True
+
+    if not offset:
+        plt.scatter(operationsReplicas[0], stateReplicas[0], color='red', label='Replica 0')
+        plt.scatter(operationsReplicas[1], stateReplicas[1], color='green', marker='x', label='Replica 1')
+        plt.scatter(operationsReplicas[2], stateReplicas[2], color='blue', marker='*', label='Replica 1')
+
+        plt.plot(operationsReplicas[0], stateReplicas[0], color='red')
+        plt.plot(operationsReplicas[1], stateReplicas[1], color='green')
+        plt.plot(operationsReplicas[2], stateReplicas[2], color='blue')
+    else:
+        plt.scatter(operationsReplicas[0], stateReplicasOffset[0], color='red', marker='d', label='Replica 0')
+        plt.scatter(operationsReplicas[1], stateReplicasOffset[1], color='green', marker='x', label='Replica 1')
+        plt.scatter(operationsReplicas[2], stateReplicasOffset[2], color='blue', marker='+', label='Replica 1')
+
+        plt.plot(operationsReplicas[0], stateReplicasOffset[0], color='red')
+        plt.plot(operationsReplicas[1], stateReplicasOffset[1], color='green')
+        plt.plot(operationsReplicas[2], stateReplicasOffset[2], color='blue')
+
+    # Customize Plot
+    plt.xlabel('Operation number')
+    plt.ylabel('Value USD-PEN')
+    plt.title('Consistency between replicas')
+    plt.legend()
+
+    # Show plot
+    plt.show()
+
 
 
 def main():
-    logfile1 = "logs/rabia/t4/rabiasvr1log.txt"
-    logfile2 = "logs/rabia/t4/rabiasvr2log.txt"
-    logfile3 = "logs/rabia/t4/rabiasvr3log.txt"
+    logfile1 = "logs/rabia/t_sample_50/rabiasvr1log.txt"
+    logfile2 = "logs/rabia/t_sample_50/rabiasvr2log.txt"
+    logfile3 = "logs/rabia/t_sample_50/rabiasvr3log.txt"
     #readLogFiles(logfile1, logfile2, logfile3)
     listFiles = [logfile1, logfile2, logfile3]
     decisions, summary = newreadLogFiles(listFiles)
     printSummaryResults(decisions, summary)
     #checkConsistency(decisions)
-    #plotData(decisionsR1, decisionsR2)
+    plotStateReplica(decisions)
     print("done...bye!")
 
 
