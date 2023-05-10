@@ -189,11 +189,17 @@ def plotStateReplica(decisions):
 
 
 def main():
-    logfile1 = "logs/rabia/t_sample_50/rabiasvr1log.txt"
-    logfile2 = "logs/rabia/t_sample_50/rabiasvr2log.txt"
-    logfile3 = "logs/rabia/t_sample_50/rabiasvr3log.txt"
-    #readLogFiles(logfile1, logfile2, logfile3)
-    listFiles = [logfile1, logfile2, logfile3]
+    # Con Rabia Logs
+    #logfile1 = "logs/rabia/t_sample_50/rabiasvr1log.txt"
+    #logfile2 = "logs/rabia/t_sample_50/rabiasvr2log.txt"
+    #logfile3 = "logs/rabia/t_sample_50/rabiasvr3log.txt"
+    # Sin Rabia Logs
+    logfile1 = "logs/sinrabia/redis_svr1.txt"
+    logfile2 = "logs/sinrabia/redis_svr2.txt"
+    
+    # Make list of log files
+    listFiles = [logfile1, logfile2]
+    # Read log files
     decisions, summary = readLogFiles(listFiles)
     printSummaryResults(decisions, summary)
     #checkConsistency(decisions)
