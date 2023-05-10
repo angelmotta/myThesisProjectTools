@@ -160,45 +160,26 @@ def plotStateReplica(decisions):
         stateReplicas.append(stateReplica)
         operationsReplicas.append(listOperations)
 
-    # Begin: Generate array of float values for each replica
-    '''
-    slotDecisionsR1 = list(range(len(decisionsR1)))
-    decisionsR1Fl = [float(i) for i in decisionsR1]
-    print("decisionsR1 Floats:")
-    print(decisionsR1Fl)
-
-    slotDecisionsR2 = list(range(len(decisionsR2)))
-    decisionsR2Fl = [float(i) for i in decisionsR2]
-    '''
-    # End: Generate array of float values for each replica
-
-    # Create plot with state of each replica
-    # x: Operation number or Unit work ~ state (We can think this like 'time')
-    # y: Value of each replica
-    #color = 0.0
-    #for index, replica in enumerate(stateReplicas):
-        #plt.plot(operationsReplicas[index], replica, label='Replica ' + str(index))
-        #plt.scatter(operationsReplicas[index], replica, label='Replica ' + str(index))
-
-    stateReplicasOffset = []
+    # Add offset to each replica
     offset = True
+    stateReplicasOffset = []
     myoffset = 0
     for stateReplica in stateReplicas:
         stateReplicasOffset.append([state + myoffset for state in stateReplica])
-        if offset: myoffset += 0.001
+        if offset: myoffset += 0.0006
 
-    colors = ['red', 'green', 'blue', 'cyan', 'magenta' ,'yellow', 'black', 'orange', 'purple', 'pink', 'brown', 'gray']
-    plt.scatter(operationsReplicas[0], stateReplicasOffset[0], color='red', marker='d', label='Replica 0')
-    plt.scatter(operationsReplicas[1], stateReplicasOffset[1], color='green', marker='x', label='Replica 1')
-    plt.scatter(operationsReplicas[2], stateReplicasOffset[2], color='blue', marker='+', label='Replica 1')
-
-    plt.plot(operationsReplicas[0], stateReplicasOffset[0], color='red')
-    plt.plot(operationsReplicas[1], stateReplicasOffset[1], color='green')
-    plt.plot(operationsReplicas[2], stateReplicasOffset[2], color='blue')
-
+    # Plot
+    # x: Operation number or Unit work ~ state (We can think this like 'time')
+    # y: Value of each replica
+    mycolors = ['red', 'green', 'blue', 'cyan', 'magenta' ,'yellow', 'black', 'orange', 'purple', 'pink', 'brown', 'gray']
+    mymarkers = ['d', 'x', '+', '^', '>', 's', 'o', 'v', '<', 'p', '*', 'h']
+    for index, replica in enumerate(stateReplicasOffset):
+        plt.scatter(operationsReplicas[index], replica, color=mycolors[index], marker=mymarkers[index], label='Replica ' + str(index))
+        plt.plot(operationsReplicas[index], replica, color=mycolors[index])
+    
     # Customize Plot
     plt.xlabel('Operation number')
-    plt.ylabel('Value USD-PEN')
+    plt.ylabel('USD-PEN value')
     plt.title('Consistency between replicas')
     plt.legend()
 
