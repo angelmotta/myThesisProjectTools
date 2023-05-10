@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 zip_longest = itertools.zip_longest
 
-def readLogFiles(logfile1, logfile2, logfile3):
+def oldreadLogFiles(logfile1, logfile2, logfile3):
     f1 = open(logfile1)
     f2 = open(logfile2)
     f3 = open(logfile3)
@@ -74,7 +74,7 @@ newreadLogFiles: read log files and generate a list of operations executed by ea
 input: list of log files
 output: list of operations executed by each replica
 '''
-def newreadLogFiles(listLogFiles):
+def readLogFiles(listLogFiles):
     # Open files
     listCsvReaders = []
     filesObjects = []
@@ -181,29 +181,20 @@ def plotStateReplica(decisions):
         #plt.scatter(operationsReplicas[index], replica, label='Replica ' + str(index))
 
     stateReplicasOffset = []
+    offset = True
     myoffset = 0
     for stateReplica in stateReplicas:
         stateReplicasOffset.append([state + myoffset for state in stateReplica])
-        myoffset += 0.001
-    
-    offset = True
+        if offset: myoffset += 0.001
 
-    if not offset:
-        plt.scatter(operationsReplicas[0], stateReplicas[0], color='red', label='Replica 0')
-        plt.scatter(operationsReplicas[1], stateReplicas[1], color='green', marker='x', label='Replica 1')
-        plt.scatter(operationsReplicas[2], stateReplicas[2], color='blue', marker='*', label='Replica 1')
+    colors = ['red', 'green', 'blue', 'cyan', 'magenta' ,'yellow', 'black', 'orange', 'purple', 'pink', 'brown', 'gray']
+    plt.scatter(operationsReplicas[0], stateReplicasOffset[0], color='red', marker='d', label='Replica 0')
+    plt.scatter(operationsReplicas[1], stateReplicasOffset[1], color='green', marker='x', label='Replica 1')
+    plt.scatter(operationsReplicas[2], stateReplicasOffset[2], color='blue', marker='+', label='Replica 1')
 
-        plt.plot(operationsReplicas[0], stateReplicas[0], color='red')
-        plt.plot(operationsReplicas[1], stateReplicas[1], color='green')
-        plt.plot(operationsReplicas[2], stateReplicas[2], color='blue')
-    else:
-        plt.scatter(operationsReplicas[0], stateReplicasOffset[0], color='red', marker='d', label='Replica 0')
-        plt.scatter(operationsReplicas[1], stateReplicasOffset[1], color='green', marker='x', label='Replica 1')
-        plt.scatter(operationsReplicas[2], stateReplicasOffset[2], color='blue', marker='+', label='Replica 1')
-
-        plt.plot(operationsReplicas[0], stateReplicasOffset[0], color='red')
-        plt.plot(operationsReplicas[1], stateReplicasOffset[1], color='green')
-        plt.plot(operationsReplicas[2], stateReplicasOffset[2], color='blue')
+    plt.plot(operationsReplicas[0], stateReplicasOffset[0], color='red')
+    plt.plot(operationsReplicas[1], stateReplicasOffset[1], color='green')
+    plt.plot(operationsReplicas[2], stateReplicasOffset[2], color='blue')
 
     # Customize Plot
     plt.xlabel('Operation number')
@@ -222,7 +213,7 @@ def main():
     logfile3 = "logs/rabia/t_sample_50/rabiasvr3log.txt"
     #readLogFiles(logfile1, logfile2, logfile3)
     listFiles = [logfile1, logfile2, logfile3]
-    decisions, summary = newreadLogFiles(listFiles)
+    decisions, summary = readLogFiles(listFiles)
     printSummaryResults(decisions, summary)
     #checkConsistency(decisions)
     plotStateReplica(decisions)
