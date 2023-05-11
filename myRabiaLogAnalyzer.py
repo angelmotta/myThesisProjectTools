@@ -90,7 +90,7 @@ def readLogFiles(listLogFiles):
     sumSetsGets = []
     for logfile in listCsvReaders:
         decisionReplica = []
-        prevState = 0
+        prevState = 3.650000
         numLine = 0
         setCmds = 0
         getCmds = 0
@@ -191,15 +191,16 @@ def plotStateReplica(decisions):
 def main():
     # TODO: Read log files pointing to a directory
     # Con Rabia Logs
-    #logfile1 = "logs/rabia/t_sample_50/rabiasvr1log.txt"
-    #logfile2 = "logs/rabia/t_sample_50/rabiasvr2log.txt"
-    #logfile3 = "logs/rabia/t_sample_50/rabiasvr3log.txt"
+    # logfile1 = "logs/rabia/t_sample_500/rabiasvr1log.txt"
+    # logfile2 = "logs/rabia/t_sample_500/rabiasvr2log.txt"
+    # logfile3 = "logs/rabia/t_sample_500/rabiasvr3log.txt"
     # Sin Rabia Logs
-    logfile1 = "logs/sinrabia/t2/redislogsvr1.txt"
-    logfile2 = "logs/sinrabia/t2/redislogsvr2.txt"
+    logfile1 = "logs/sinrabia/t3/redislogsvr1.txt"
+    logfile2 = "logs/sinrabia/t3/redislogsvr2.txt"
+    logfile3 = "logs/sinrabia/t3/redislogsvr3.txt"
     
     # Make list of log files
-    listFiles = [logfile1, logfile2]
+    listFiles = [logfile1, logfile2, logfile3]
     # Read log files
     decisions, summary = readLogFiles(listFiles)
     printSummaryResults(decisions, summary)
