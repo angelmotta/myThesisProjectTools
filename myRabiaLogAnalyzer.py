@@ -1,6 +1,8 @@
 import csv
 import itertools
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogFormatter
+
 
 zip_longest = itertools.zip_longest
 
@@ -143,7 +145,25 @@ def printSummaryResults(decisions, summary):
 checkConsistency: verify consistency logs finding differences
 output: #inconsistencies
 '''
-def checkConsistency():
+def checkConsistency(decisions):
+    # Check consistency of length of each replica
+    lenArr = len(decisions[0])
+    for i in range(len(decisions)):
+        if len(decisions[i]) != lenArr:
+            print("Error: Replica " + str(i) + " has different length")
+            exit(1)
+    # compare each value of each array
+    countDiff = 0
+    for i in range(lenArr):
+        curState = decisions[0][i]
+        for j in range(1, len(decisions)):
+            if curState != decisions[j][i]:
+                countDiff += 1
+                print("Inconsistencia #" + str(countDiff) + ": Replicas have different value in #operation " + str(i))
+                for k in range(len(decisions)):
+                    print("Replica #" + str(k) + " : " + str(decisions[k][i]))
+                break
+    print("Total Inconsistencias: " + str(countDiff))
     return
 
 
@@ -176,6 +196,10 @@ def plotStateReplica(decisions):
     for index, replica in enumerate(stateReplicasOffset):
         plt.scatter(operationsReplicas[index], replica, color=mycolors[index], marker=mymarkers[index], label='Replica ' + str(index))
         plt.plot(operationsReplicas[index], replica, color=mycolors[index])
+        # plt.semilogx(operationsReplicas[index], replica)
+        # plt.semilogy(operationsReplicas[index], replica)
+        # plt.gca().yaxis.set_major_formatter(LogFormatter(base=2))
+
     
     # Customize Plot
     plt.xlabel('Operation number')
@@ -183,6 +207,9 @@ def plotStateReplica(decisions):
     plt.title('Consistency between replicas')
     plt.legend()
 
+    # Apply log scale to the x-axis
+    # plt.xscale('log')
+    # plt.xscale('symlog', linthresh=1)
     # Show plot
     plt.show()
 
@@ -204,7 +231,7 @@ def main():
     # Read log files
     decisions, summary = readLogFiles(listFiles)
     printSummaryResults(decisions, summary)
-    #checkConsistency(decisions)
+    checkConsistency(decisions)
     plotStateReplica(decisions)
     print("done...bye!")
 

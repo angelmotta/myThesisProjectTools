@@ -1,7 +1,7 @@
 #!/bin/bash
-docker cp redis_svr1:/root/mylogs/redislogsvr1.txt logs/sinrabia/t3/
-docker cp redis_svr2:/root/mylogs/redislogsvr2.txt logs/sinrabia/t3/
-docker cp redis_svr3:/root/mylogs/redislogsvr3.txt logs/sinrabia/t3/
+docker cp redis_svr1:/root/mylogs/redislogsvr1.txt logs/sinrabia/t6_500/
+docker cp redis_svr2:/root/mylogs/redislogsvr2.txt logs/sinrabia/t6_500/
+docker cp redis_svr3:/root/mylogs/redislogsvr3.txt logs/sinrabia/t6_500/
 
 # Monitor
 # On svr1
