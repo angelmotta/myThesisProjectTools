@@ -18,6 +18,11 @@ r2 = [x + bar_width for x in r1]
 plt.bar(r1, technique1_inconsistencies, color='blue', width=bar_width, edgecolor='white', label='Technique 1')
 plt.bar(r2, technique2_inconsistencies, color='green', width=bar_width, edgecolor='white', label='Technique 2')
 
+# Add text labels on top of each bar
+for i, v1, v2 in zip(r1, technique1_inconsistencies, technique2_inconsistencies):
+    plt.text(i, v1+0.1, str(v1), ha='center')
+    plt.text(i+bar_width, v2+0.1, str(v2), ha='center')
+
 # Add xticks on the middle of the group bars
 plt.xlabel('Amount of Requests')
 plt.ylabel('Amount of Inconsistencies')
