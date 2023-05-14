@@ -237,12 +237,12 @@ def plotInconsistencies(listInconsistencies):
 
     # Create the plot
     plt.bar(res1_x, srInconsistencies, color='blue', width=barWidth, edgecolor='white', label='No Rabia')
-    plt.bar(res2_x, crInconsistencies, color='green', width=barWidth, edgecolor='white', label='Using Rabia')
+    plt.bar(res2_x, [x + 1 for x in crInconsistencies], color='green', width=barWidth, edgecolor='white', label='Using Rabia')
 
     # Add text labels on top of each bar
     for i, v1, v2 in zip(res1_x, srInconsistencies, crInconsistencies):
         plt.text(i, v1+0.5, str(v1), ha='center')
-        plt.text(i+barWidth, v2+0.5, str(v2), ha='center')
+        plt.text(i+barWidth, v2+1, str(v2), ha='center')
 
     # Add xticks on the middle of the group bars
     plt.xlabel('Amount of Concurrent Requests')
