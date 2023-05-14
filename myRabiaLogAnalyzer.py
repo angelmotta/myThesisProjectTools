@@ -74,7 +74,7 @@ def oldreadLogFiles(logfile1, logfile2, logfile3):
 '''
 newreadLogFiles: read log files and generate a list of operations executed by each replica
 input: list of log files
-output: list of operations executed by each replica
+output: decisions of each replicas. Eg [decisionsR1, decisionsR2, decisionsR3]
 '''
 def readLogFiles(listLogFiles):
     # Open files
@@ -164,7 +164,7 @@ def checkConsistency(decisions):
                     print("Replica #" + str(k) + " : " + str(decisions[k][i]))
                 break
     print("Total Inconsistencias: " + str(countDiff))
-    return
+    return countDiff
 
 
 '''
@@ -213,26 +213,83 @@ def plotStateReplica(decisions):
     # Show plot
     plt.show()
 
+'''
+plotInconsistencies(): plot inconsistencies between replicas
+Input: listInconsistencies: is a list of tuples where each tuple has a pair of numbers of inconsistencies by technique
+'''
+def plotInconsistencies(listInconsistencies):
+    print('Plotting Inconsistencies')
+    # Set the width of each bar
+    barWidth = 0.35
+
+    requestsWorkload = []  # x axis
+    srInconsistencies = []  # bars in y axis
+    crInconsistencies = []  # bars in y axis
+    for workLoad in listInconsistencies:
+        print(workLoad)
+        requestsWorkload.append(workLoad['numrequests'])
+        srInconsistencies.append(workLoad['inconsistencies'][0])
+        crInconsistencies.append(workLoad['inconsistencies'][1])
+    
+    # Set the x positions of the bars
+    res1_x = [x for x in range(len(requestsWorkload))]
+    res2_x = [x + barWidth for x in res1_x]
+
+    # Create the plot
+    plt.bar(res1_x, srInconsistencies, color='blue', width=barWidth, edgecolor='white', label='No Rabia')
+    plt.bar(res2_x, crInconsistencies, color='green', width=barWidth, edgecolor='white', label='Using Rabia')
+
+    # Add xticks on the middle of the group bars
+    plt.xlabel('Amount of Concurrent Requests')
+    plt.ylabel('Amount of Inconsistencies')
+    plt.xticks([r + barWidth / 2 for r in range(len(requestsWorkload))], requestsWorkload)
+
+    # Add a legend
+    plt.legend()
+
+    # Show the plot
+    plt.show()
+
+    return
+
 
 
 def main():
     # TODO: Read log files pointing to a directory
     # Con Rabia Logs
-    # logfile1 = "logs/rabia/t_sample_500/rabiasvr1log.txt"
-    # logfile2 = "logs/rabia/t_sample_500/rabiasvr2log.txt"
-    # logfile3 = "logs/rabia/t_sample_500/rabiasvr3log.txt"
+    crLogFile1 = "logs/rabia/t_sample_500/rabiasvr1log.txt"
+    crLogFile2 = "logs/rabia/t_sample_500/rabiasvr2log.txt"
+    crLogFile3 = "logs/rabia/t_sample_500/rabiasvr3log.txt"
     # Sin Rabia Logs
-    logfile1 = "logs/sinrabia/t3/redislogsvr1.txt"
-    logfile2 = "logs/sinrabia/t3/redislogsvr2.txt"
-    logfile3 = "logs/sinrabia/t3/redislogsvr3.txt"
+    srLogFile1 = "logs/sinrabia/t6_500/redislogsvr1.txt"
+    srLogFile2 = "logs/sinrabia/t6_500/redislogsvr2.txt"
+    srLogFile3 = "logs/sinrabia/t6_500/redislogsvr3.txt"
     
+    '''
     # Make list of log files
-    listFiles = [logfile1, logfile2, logfile3]
+    srListFiles = [srLogFile1, srLogFile2, srLogFile3]
     # Read log files
-    decisions, summary = readLogFiles(listFiles)
-    printSummaryResults(decisions, summary)
-    checkConsistency(decisions)
+    decisions, summary = readLogFiles(srListFiles)
+    #printSummaryResults(decisions, summary)
+    srTotalInc = checkConsistency(decisions)
     plotStateReplica(decisions)
+    '''
+
+    ### Count inconsistencies for each technique ###
+    listInconsistencies = []
+    # Sin Rabia analysis
+    srListFiles = [srLogFile1, srLogFile2, srLogFile3]  # workload: 500 requests
+    decisions, summary = readLogFiles(srListFiles)
+    srTotalInconsistencies = checkConsistency(decisions)
+
+    # Con Rabia analysis
+    crListFiles = [crLogFile1, crLogFile2, crLogFile3]  # workload: 500 requests
+    decisions, summary = readLogFiles(crListFiles)
+    crTotalInconsistencies = checkConsistency(decisions)
+
+    # Make summary inconsistencies for workload 500
+    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
+    plotInconsistencies(listInconsistencies)
     print("done...bye!")
 
 
