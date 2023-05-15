@@ -86,11 +86,11 @@ checkConsistency: verify consistency logs finding differences
 output: #inconsistencies
 '''
 def checkConsistency(decisions):
-    # Check consistency of length of each replica
+    # SanityCheck: verify length of each replica's decisions
     lenArr = len(decisions[0])
     for i in range(len(decisions)):
         if len(decisions[i]) != lenArr:
-            print("Error: Replica " + str(i) + " has different length")
+            print("Panic Error: Replica " + str(i) + " has different length")
             exit(1)
     # compare each value of each array
     countDiff = 0
@@ -99,9 +99,11 @@ def checkConsistency(decisions):
         for j in range(1, len(decisions)):
             if curState != decisions[j][i]:
                 countDiff += 1
-                print("Inconsistencia #" + str(countDiff) + ": Replicas have different value in #operation " + str(i))
-                for k in range(len(decisions)):
-                    print("Replica #" + str(k) + " : " + str(decisions[k][i]))
+                if lenArr <= 100:
+                    # print inconsistency detail to console
+                    print("Inconsistencia #" + str(countDiff) + ": Replicas have different value in #operation " + str(i))
+                    for k in range(len(decisions)):
+                        print("Replica #" + str(k) + " : " + str(decisions[k][i]))
                 break
     print("Total Inconsistencias: " + str(countDiff))
     return countDiff
@@ -109,6 +111,7 @@ def checkConsistency(decisions):
 
 '''
 plotLogsReplica(): plot state of each replica in one graph
+input: decisions is a list of lists. Each list represents the state of a replica over a period of operations.
 '''
 def plotStateReplica(decisions):
     # Generate array of float values for each replica
@@ -140,7 +143,6 @@ def plotStateReplica(decisions):
         # plt.semilogy(operationsReplicas[index], replica)
         # plt.gca().yaxis.set_major_formatter(LogFormatter(base=2))
 
-    
     # Customize Plot
     plt.xlabel('Operation number')
     plt.ylabel('USD-PEN value')
@@ -204,12 +206,8 @@ def mapLogFiles(isRabiaWorkload, workload_dir):
     # Samples log files
     # Sin Rabia Logs
     # srLogFile50_1 = "logs/sinrabia/t_sample_50_2c/redissvr1.log"
-    # srLogFile50_2 = "logs/sinrabia/t_sample_50_2c/redissvr2.log"
-    # srLogFile50_3 = "logs/sinrabia/t_sample_50_2c/redissvr3.log"
     # Con Rabia Logs
     # crLogFile50_1 = "logs/rabia/t_sample_50/rabiasvr1.log"
-    # crLogFile50_2 = "logs/rabia/t_sample_50/rabiasvr2.log"
-    # crLogFile50_3 = "logs/rabia/t_sample_50/rabiasvr3.log"
     # Map log files
     if isRabiaWorkload:
         logFile1 = RABIA_LOGS_DIR + workload_dir + "/rabiasvr1.log"
@@ -222,11 +220,10 @@ def mapLogFiles(isRabiaWorkload, workload_dir):
     return [logFile1, logFile2, logFile3]
 
 
-def getPlotInconsistencies():
+def getPlotInconsistencies(listWorkLoadsDirs):
     ### Count inconsistencies for each technique ###
     listInconsistencies = []
-    # NEW BEGIN: Workloads
-    listWorkLoadsDirs = ["t_50_2c", "t_500_2c", "t_5000_2c"]
+    # BEGIN: read Workloads
     for workLoadDir in listWorkLoadsDirs:
         # No Rabia analysis
         srListFiles = mapLogFiles(False, workLoadDir)
@@ -238,41 +235,19 @@ def getPlotInconsistencies():
         crTotalInconsistencies = checkConsistency(crDecisions)
         # Append results of workload 50
         listInconsistencies.append({'numrequests': len(srDecisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
-    # NEW END: Workloads
-
-    # BEGIN: Read log files from workloads
-    '''
-    # Workload 50
-    # Sin Rabia analysis
-    srListFiles = mapLogFiles(False, "t_50_2c")
-    decisions, summary = readLogFiles(srListFiles)
-    srTotalInconsistencies = checkConsistency(decisions)
-    # Con Rabia analysis
-    crListFiles = mapLogFiles(True, "t_50_2c")
-    decisions, summary = readLogFiles(crListFiles)
-    crTotalInconsistencies = checkConsistency(decisions)
-    # Append results of workload 50
-    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
-
-    # Workload 500
-    # Sin Rabia analysis
-    srListFiles = mapLogFiles(False, "t_500_2c")
-    decisions, summary = readLogFiles(srListFiles)
-    srTotalInconsistencies = checkConsistency(decisions)
-    # Con Rabia analysis
-    crListFiles = mapLogFiles(True, "t_500_2c")
-    decisions, summary = readLogFiles(crListFiles)
-    crTotalInconsistencies = checkConsistency(decisions)
-    # Append results of workload 500
-    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
-    # END: Read log files from workloads
-    '''
-    
+    # END: read Workloads    
     # Plot results
     print("listInconsistencies: ")
     print(listInconsistencies)
     plotInconsistencies(listInconsistencies)
 
+
+def getPlotStateReplica(isRabiaWorkload, workLoadDir):
+    # Map log files
+    listLogFiles = mapLogFiles(isRabiaWorkload, workLoadDir)
+    decisions, summary = readLogFiles(listLogFiles)
+    plotStateReplica(decisions)
+    return
 
 def main():
     
@@ -285,7 +260,13 @@ def main():
     srTotalInc = checkConsistency(decisions)
     plotStateReplica(decisions)
     '''
-    getPlotInconsistencies()
+    # Plot State Replicas
+    srWorkLoad = "t_50_2c"
+    getPlotStateReplica(False, srWorkLoad)
+
+    # Plot Number of Inconsistencies
+    listWorkLoadsDirs = ["t_50_2c", "t_500_2c", "t_5000_2c"]
+    getPlotInconsistencies(listWorkLoadsDirs)
     print("done...bye!")
 
 
