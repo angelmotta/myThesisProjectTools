@@ -5,6 +5,11 @@ from matplotlib.ticker import LogFormatter
 
 
 zip_longest = itertools.zip_longest
+REDIS_LOGS_DIR = "logs/sinrabia/"
+RABIA_LOGS_DIR = "logs/rabia/"
+REDIS_LOGFILE = "redislog"
+RABIA_LOGFILE = "rabialog"
+LOG_EXTENSION = ".log"
 
 def oldreadLogFiles(logfile1, logfile2, logfile3):
     f1 = open(logfile1)
@@ -215,7 +220,7 @@ def plotStateReplica(decisions):
 
 '''
 plotInconsistencies(): plot inconsistencies between replicas
-Input: listInconsistencies: is a list of tuples where each tuple has a pair of numbers of inconsistencies by technique
+Input: listInconsistencies: is a list of objects where each object is a dictionary with inconsistencies
 '''
 def plotInconsistencies(listInconsistencies):
     print('Plotting Inconsistencies')
@@ -258,17 +263,62 @@ def plotInconsistencies(listInconsistencies):
     return
 
 
+def mapLogFiles(isRabiaWorkload, workload_dir):
+    # Samples log files
+    # Sin Rabia Logs
+    # srLogFile50_1 = "logs/sinrabia/t_sample_50_2c/redissvr1.log"
+    # srLogFile50_2 = "logs/sinrabia/t_sample_50_2c/redissvr2.log"
+    # srLogFile50_3 = "logs/sinrabia/t_sample_50_2c/redissvr3.log"
+    # Con Rabia Logs
+    # crLogFile50_1 = "logs/rabia/t_sample_50/rabiasvr1.log"
+    # crLogFile50_2 = "logs/rabia/t_sample_50/rabiasvr2.log"
+    # crLogFile50_3 = "logs/rabia/t_sample_50/rabiasvr3.log"
+    # Map log files
+    if isRabiaWorkload:
+        logFile1 = RABIA_LOGS_DIR + workload_dir + "/rabiasvr1.log"
+        logFile2 = RABIA_LOGS_DIR + workload_dir + "/rabiasvr2.log"
+        logFile3 = RABIA_LOGS_DIR + workload_dir + "/rabiasvr3.log"
+    else:
+        logFile1 = REDIS_LOGS_DIR + workload_dir + "/redissvr1.log"
+        logFile2 = REDIS_LOGS_DIR + workload_dir + "/redissvr2.log"
+        logFile3 = REDIS_LOGS_DIR + workload_dir + "/redissvr3.log"
+    return [logFile1, logFile2, logFile3]
+
+
+def getPlotInconsistencies():
+    ### Count inconsistencies for each technique ###
+    listInconsistencies = []
+    # Workload 50
+    # Sin Rabia analysis
+    srListFiles = mapLogFiles(False, "t_sample_50_2c")
+    decisions, summary = readLogFiles(srListFiles)
+    srTotalInconsistencies = checkConsistency(decisions)
+    # Con Rabia analysis
+    crListFiles = mapLogFiles(True, "t_sample_50")
+    decisions, summary = readLogFiles(crListFiles)
+    crTotalInconsistencies = checkConsistency(decisions)
+    # Append results of workload 50
+    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
+
+    # Workload 500
+    # Sin Rabia analysis
+    srListFiles = mapLogFiles(False, "t6_500")
+    decisions, summary = readLogFiles(srListFiles)
+    srTotalInconsistencies = checkConsistency(decisions)
+    # Con Rabia analysis
+    crListFiles = mapLogFiles(True, "t_sample_500")
+    decisions, summary = readLogFiles(crListFiles)
+    crTotalInconsistencies = checkConsistency(decisions)
+    # Append results of workload 500
+    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
+    
+    # Plot results
+    print("listInconsistencies: ")
+    print(listInconsistencies)
+    plotInconsistencies(listInconsistencies)
+
 
 def main():
-    # TODO: Read log files pointing to a directory
-    # Con Rabia Logs
-    crLogFile1 = "logs/rabia/t_sample_500/rabiasvr1log.txt"
-    crLogFile2 = "logs/rabia/t_sample_500/rabiasvr2log.txt"
-    crLogFile3 = "logs/rabia/t_sample_500/rabiasvr3log.txt"
-    # Sin Rabia Logs
-    srLogFile1 = "logs/sinrabia/t6_500/redislogsvr1.txt"
-    srLogFile2 = "logs/sinrabia/t6_500/redislogsvr2.txt"
-    srLogFile3 = "logs/sinrabia/t6_500/redislogsvr3.txt"
     
     '''
     # Make list of log files
@@ -279,22 +329,7 @@ def main():
     srTotalInc = checkConsistency(decisions)
     plotStateReplica(decisions)
     '''
-
-    ### Count inconsistencies for each technique ###
-    listInconsistencies = []
-    # Sin Rabia analysis
-    srListFiles = [srLogFile1, srLogFile2, srLogFile3]  # workload: 500 requests
-    decisions, summary = readLogFiles(srListFiles)
-    srTotalInconsistencies = checkConsistency(decisions)
-
-    # Con Rabia analysis
-    crListFiles = [crLogFile1, crLogFile2, crLogFile3]  # workload: 500 requests
-    decisions, summary = readLogFiles(crListFiles)
-    crTotalInconsistencies = checkConsistency(decisions)
-
-    # Make summary inconsistencies for workload 500
-    listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
-    plotInconsistencies(listInconsistencies)
+    getPlotInconsistencies()
     print("done...bye!")
 
 
