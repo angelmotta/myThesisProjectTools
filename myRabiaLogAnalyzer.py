@@ -177,19 +177,21 @@ def plotInconsistencies(listInconsistencies):
 
     # Create the plot
     plt.bar(res1_x, srInconsistencies, color='blue', width=barWidth, edgecolor='white', label='No Rabia')
-    plt.bar(res2_x, [x + 1 for x in crInconsistencies], color='green', width=barWidth, edgecolor='white', label='Using Rabia')
-
+    plt.bar(res2_x, crInconsistencies, color='green', width=barWidth, edgecolor='white', label='Using Rabia')
+    # [x + 1 for x in crInconsistencies]
     # Add text labels on top of each bar
     for i, v1, v2 in zip(res1_x, srInconsistencies, crInconsistencies):
         plt.text(i, v1+0.5, str(v1), ha='center')
+        plt.text(i, -120, 'No Rabia', ha='center')
         plt.text(i+barWidth, v2+1, str(v2), ha='center')
+        plt.text(i+barWidth, -120, 'Using Rabia', ha='center')
 
     # Add xticks on the middle of the group bars
     plt.xlabel('Amount of Concurrent Requests')
     plt.ylabel('Amount of Inconsistencies')
     plt.xticks([r + barWidth / 2 for r in range(len(requestsWorkload))], requestsWorkload)
 
-    # Add a legend
+    #plt.title('Inconsistencies in 3 replicas with 2 clients')
     plt.legend()
 
     # Show the plot
@@ -223,13 +225,30 @@ def mapLogFiles(isRabiaWorkload, workload_dir):
 def getPlotInconsistencies():
     ### Count inconsistencies for each technique ###
     listInconsistencies = []
+    # NEW BEGIN: Workloads
+    listWorkLoadsDirs = ["t_50_2c", "t_500_2c", "t_5000_2c"]
+    for workLoadDir in listWorkLoadsDirs:
+        # No Rabia analysis
+        srListFiles = mapLogFiles(False, workLoadDir)
+        srDecisions, summary = readLogFiles(srListFiles)
+        srTotalInconsistencies = checkConsistency(srDecisions)
+        # Using Rabia analysis
+        crListFiles = mapLogFiles(True, workLoadDir)
+        crDecisions, summary = readLogFiles(crListFiles)
+        crTotalInconsistencies = checkConsistency(crDecisions)
+        # Append results of workload 50
+        listInconsistencies.append({'numrequests': len(srDecisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
+    # NEW END: Workloads
+
+    # BEGIN: Read log files from workloads
+    '''
     # Workload 50
     # Sin Rabia analysis
-    srListFiles = mapLogFiles(False, "t_sample_50_2c")
+    srListFiles = mapLogFiles(False, "t_50_2c")
     decisions, summary = readLogFiles(srListFiles)
     srTotalInconsistencies = checkConsistency(decisions)
     # Con Rabia analysis
-    crListFiles = mapLogFiles(True, "t_sample_50")
+    crListFiles = mapLogFiles(True, "t_50_2c")
     decisions, summary = readLogFiles(crListFiles)
     crTotalInconsistencies = checkConsistency(decisions)
     # Append results of workload 50
@@ -237,15 +256,17 @@ def getPlotInconsistencies():
 
     # Workload 500
     # Sin Rabia analysis
-    srListFiles = mapLogFiles(False, "t6_500")
+    srListFiles = mapLogFiles(False, "t_500_2c")
     decisions, summary = readLogFiles(srListFiles)
     srTotalInconsistencies = checkConsistency(decisions)
     # Con Rabia analysis
-    crListFiles = mapLogFiles(True, "t_sample_500")
+    crListFiles = mapLogFiles(True, "t_500_2c")
     decisions, summary = readLogFiles(crListFiles)
     crTotalInconsistencies = checkConsistency(decisions)
     # Append results of workload 500
     listInconsistencies.append({'numrequests': len(decisions[0]), 'inconsistencies': (srTotalInconsistencies, crTotalInconsistencies)})
+    # END: Read log files from workloads
+    '''
     
     # Plot results
     print("listInconsistencies: ")
