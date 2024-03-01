@@ -10,7 +10,8 @@ RABIA_LOGS_DIR = "logs/rabia/"
 REDIS_LOGFILE = "redislog"
 RABIA_LOGFILE = "rabialog"
 LOG_EXTENSION = ".log"
-
+SINSMR_COLOR = (1.0, 0.5, 0.0) # dark orange
+SMR_RABIA_COLOR = 'blue'
 '''
 readLogFiles: read log files and generate a list of operations executed by each replica
 input: list of log files
@@ -156,7 +157,7 @@ def plotStateReplica(decisions):
     plt.show()
 
 '''
-plotInconsistencies(): plot inconsistencies between replicas
+plotInconsistencies function generate a bar plot of inconsistencies between replicas
 Input: listInconsistencies: is a list of objects where each object is a dictionary with inconsistencies
 '''
 def plotInconsistencies(listInconsistencies):
@@ -178,19 +179,19 @@ def plotInconsistencies(listInconsistencies):
     res2_x = [x + barWidth for x in res1_x]
 
     # Create the plot
-    plt.bar(res1_x, srInconsistencies, color='blue', width=barWidth, edgecolor='white', label='Sin Rabia')
-    plt.bar(res2_x, crInconsistencies, color='green', width=barWidth, edgecolor='white', label='Con Rabia')
+    plt.bar(res1_x, srInconsistencies, color=SINSMR_COLOR, width=barWidth, edgecolor='white', label='Sin SMR')
+    plt.bar(res2_x, crInconsistencies, color=SMR_RABIA_COLOR, width=barWidth, edgecolor='white', label='SMR Rabia')
     # [x + 1 for x in crInconsistencies]
     # Add text labels on top of each bar
     for i, v1, v2 in zip(res1_x, srInconsistencies, crInconsistencies):
         plt.text(i, v1+0.5, str(v1), ha='center')
-        plt.text(i, -120, 'Sin Rabia', ha='center')
+        plt.text(i, -120, 'Sin SMR', ha='center')
         plt.text(i+barWidth, v2+1, str(v2), ha='center')
-        plt.text(i+barWidth, -120, 'Con Rabia', ha='center')
+        plt.text(i+barWidth, -120, 'SMR Rabia', ha='center')
 
     # Add xticks on the middle of the group bars
-    plt.xlabel('Cantidad de operaciones procesadas')
-    plt.ylabel('Cantidad de inconsistencias')
+    plt.xlabel('Operaciones procesadas')
+    plt.ylabel('Inconsistencias')
     plt.xticks([r + barWidth / 2 for r in range(len(requestsWorkload))], requestsWorkload)
 
     #plt.title('Inconsistencies in 3 replicas with 2 clients')
@@ -219,7 +220,9 @@ def mapLogFiles(isRabiaWorkload, workload_dir):
         logFile3 = REDIS_LOGS_DIR + workload_dir + "/redissvr3.log"
     return [logFile1, logFile2, logFile3]
 
-
+'''
+Bar plot of inconsistencies for different workloads
+'''
 def getPlotInconsistencies(listWorkLoadsDirs):
     ### Count inconsistencies for each technique ###
     listInconsistencies = []
@@ -249,6 +252,55 @@ def getPlotStateReplica(isRabiaWorkload, workLoadDir):
     plotStateReplica(decisions)
     return
 
+
+# Function to plot throughput vs latency to compare two techniques
+def plotThroughputVsLatency():
+    # Data for SinRabia
+    thr_sr = [668, 1772, 2034, 2133, 2228, 2076, 2010]  # Technique 1 throughput
+    lat99p_sr = [2, 8, 8, 14, 16.11, 22.67, 23.87]  # Technique 1 latency
+
+    # Data for ConRabia
+    thr_cr = [16.67, 99.75, 388.42, 1156, 1241.08, 1290, 1347.25]  # Technique 2 throughput
+    lat99p_cr = [101.22, 77.37, 58.61, 22.89, 24.94, 25.94, 30.51]  # Technique 2 latency
+
+    # Plotting the data with lines
+    plt.plot(thr_sr, lat99p_sr, 'o-', color=SINSMR_COLOR, label='Sin SMR')
+    plt.plot(thr_cr, lat99p_cr, 'o-', color=SMR_RABIA_COLOR, label='SMR Rabia')
+    plt.xlabel('Rendimiento (solicitudes/segundo)')
+    plt.ylabel('Latencia percentil 99 (ms)')
+    plt.legend()
+
+    # Adding grid lines
+    plt.grid(True)
+
+    # Displaying the plot
+    plt.show()
+
+# Function to plot clients vs latency to compare two techniques
+def plotClientsVsLatency():
+    # Data for SinRabia
+    clients_sr = [1, 3, 4, 6, 9, 12, 15]  # number of parallel clients Technique 1 
+    lat99p_sr = [2, 8, 8, 14, 16.11, 22.67, 23.87]  # latencies for Technique 1
+
+    # Data for ConRabia
+    clients_cr = [1, 3, 4, 6, 9, 12, 15]  # number of parallel clients Technique 2 
+    lat99p_cr = [101.22, 77.37, 58.61, 22.89, 24.94, 25.94, 30.51]  # latencies for Technique 1
+
+    # Plotting the data with lines
+    plt.plot(clients_sr, lat99p_sr, 'o-', color=SINSMR_COLOR, label='Sin SMR')
+    plt.plot(clients_cr, lat99p_cr, 'o-', color=SMR_RABIA_COLOR, label='SMR Rabia')
+    plt.xlabel('Clientes en paralelo')
+    plt.ylabel('Latencia percentil 99 (ms)')
+    plt.legend()
+
+    # Adding grid lines
+    plt.grid(True)
+
+    # Displaying the plot
+    plt.show()
+
+
+
 def main():
     
     '''
@@ -260,16 +312,22 @@ def main():
     srTotalInc = checkConsistency(decisions)
     plotStateReplica(decisions)
     '''
+
+    
     # Plot State Replicas
+    '''
     srWorkLoad = "t_50_2c"
     getPlotStateReplica(False, srWorkLoad)
 
     crWorkLoad = "t_50_2c"
     getPlotStateReplica(True, crWorkLoad)
-
+    
     # Plot Number of Inconsistencies
     listWorkLoadsDirs = ["t_50_2c", "t_500_2c", "t_5000_2c"]
     getPlotInconsistencies(listWorkLoadsDirs)
+    '''
+    plotThroughputVsLatency()
+    plotClientsVsLatency()
     print("done...bye!")
 
 
