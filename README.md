@@ -1,2 +1,1 @@
-# myThesisProjectTools
-My internal tools for my final project
+# Internal tools used in thesis project
