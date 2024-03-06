@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copiar archivos Redis-Monitor Logs en ambiente de Containers sin Rabia.
 docker cp redis_svr1:/root/mylogs/redissvr1.log logs/sinrabia/t_sample_5000_2/
 docker cp redis_svr2:/root/mylogs/redissvr2.log logs/sinrabia/t_sample_5000_2/
 docker cp redis_svr3:/root/mylogs/redissvr3.log logs/sinrabia/t_sample_5000_2/
